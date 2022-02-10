@@ -32,21 +32,60 @@ struct ValueNumbering : public FunctionPass {
                 errs() << inst << "\n";
                 if(inst.getOpcode() == Instruction::Load){
                     errs() << "This is Load"<<"\n";
+                    errs() << "&inst: " << &inst << "\n";
+                    errs() << "operand 0: " << inst.getOperand(0) << "\n";
+                    if (inst.isBinaryOp()) {
+                        errs() << "BINARY!! \n";
+                    } else {
+                        errs() << "NOT binary..\n";
+                    }
                 }
                 if(inst.getOpcode() == Instruction::Store){
                     errs() << "This is Store"<<"\n";
+                    errs() << "operand 0: " << inst.getOperand(0) << "\n";
+                    errs() << "operand 1: " << inst.getOperand(1) << "\n";
+                    if (inst.isBinaryOp()) {
+                        errs() << "BINARY!! \n";
+                    } else {
+                        errs() << "NOT binary..\n";
+                    }
+
                 }
                 if (inst.isBinaryOp())
                 {
                     errs() << "Op Code:" << inst.getOpcodeName()<<"\n";
                     if(inst.getOpcode() == Instruction::Add){
                         errs() << "This is Addition"<<"\n";
+                        errs() << "&inst: " << &inst << "\n";
+                        errs() << "operand 0: " << inst.getOperand(0) << "\n";
+                        errs() << "operand 1: " << inst.getOperand(1) << "\n";
+                        if (inst.isBinaryOp()) {
+                            errs() << "BINARY!! \n";
+                        } else {
+                            errs() << "NOT binary..\n";
+                        }
                     }
-                    if(inst.getOpcode() == Instruction::Add){
-                        errs() << "This is Addition"<<"\n";
-                    }
+                    // if(inst.getOpcode() == Instruction::Add){
+                    //     errs() << "This is Addition"<<"\n";
+                    //     errs() << "&inst: " << &inst << "\n";
+                    //     errs() << "operand 0: " << inst.getOperand(0) << "\n";
+                    //     errs() << "operand 1: " << inst.getOperand(1) << "\n";
+                    //     if (inst.isBinaryOp()) {
+                    //         errs() << "BINARY!! \n";
+                    //     } else {
+                    //         errs() << "NOT binary..\n";
+                    //     }
+                    // }
                     if(inst.getOpcode() == Instruction::Mul){
                         errs() << "This is Multiplication"<<"\n";
+                        errs() << "&inst: " << &inst << "\n";
+                        errs() << "operand 0: " << inst.getOperand(0) << "\n";
+                        errs() << "operand 1: " << inst.getOperand(1) << "\n";
+                        if (inst.isBinaryOp()) {
+                            errs() << "BINARY!! \n";
+                        } else {
+                            errs() << "NOT binary..\n";
+                        }
                     }
                     
                     // see other classes, Instruction::Sub, Instruction::UDiv, Instruction::SDiv
