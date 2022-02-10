@@ -6,6 +6,7 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Instruction.h"
 #include <string>
+#include <unordered_map>
 
 using namespace llvm;
 using namespace std;
@@ -18,7 +19,48 @@ namespace {
 struct ValueNumbering : public FunctionPass {
     string func_name = "test";
     static char ID;
-    ValueNumbering() : FunctionPass(ID) {}
+    ValueNumbering() : FunctionPass(ID), valCounter(0), {}
+
+    int valCounter;
+    unordered_map<int*, int> registers;
+    unordered_map<string, int> binaryExpr;
+
+    int processSrc(int* reg) {
+        auto itr = registers.find(reg);
+       if (itr == registers.end()) {
+            valCounter++;
+            registers.insert({reg, valCounter});
+            return valCounter;
+        } else {
+            return itr->second;
+        }
+    }
+
+    void processDest(int* reg, int valueID) {
+        auto itr = registers.find(reg);
+        if (itr == registers.end()) {
+            registers.insert({reg, valueID});
+        } else {
+            itr->second = valueID;
+        }
+    }
+
+    int processBinOp(int a, int b, char sign) {
+        string keyA = to_string(a) + sign + to_string(b);
+        string keyB = to_string(b) + sign + to_string(a);
+        auto itr = binaryExpr.find(keyA);
+
+        if (itr == binaryExpr.end()) {
+            itr = binaryexpr.find(keyB);
+            if (itr == binaryExpr.end()) {
+                valCounter++;
+                binaryExpr.insert({keyA, valCounter});
+                return valCounter;
+            }
+        } 
+        return itr->second;
+    }
+
 
     bool runOnFunction(Function &F) override {
 	    
