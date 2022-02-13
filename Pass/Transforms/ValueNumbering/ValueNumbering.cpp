@@ -67,48 +67,38 @@ struct ValueNumbering : public FunctionPass {
         errs() << "ValueNumbering: " << F.getName() << "\n";
         if (F.getName() != func_name) return false;
 
-        for (auto& basic_block : F)
-        {
-            for (auto& inst : basic_block)
-            {
-                errs() << inst << "\n";
-                if(inst.getOpcode() == Instruction::Load){
+        for (auto& basic_block : F) {
+
+            for (auto& inst : basic_block) {
+
+                // errs() << inst << "\n";
+                if (inst.getOpcode() == Instruction::Load) {
                     Value* srcReg = inst.getOperand(0);
                     Value* destReg = &inst;
                     int srcID = processSrc(srcReg);
                     processDest(destReg, srcID);
 
-                    errs() << "\t\t\t" << srcID << " = " << srcID << "\n";
-                    errs() << "This is Load"<<"\n";
-                    errs() << "&inst: " << &inst << "\n";
-                    errs() << "operand 0: " << inst.getOperand(0) << "\n";
-                    if (inst.isBinaryOp()) {
-                        errs() << "BINARY!! \n";
-                    } else {
-                        errs() << "NOT binary..\n";
-                    }
+                    errs() << inst << "\t" << srcID << " = " << srcID << "\n";
+                    // errs() << "This is Load"<<"\n";
+                    // errs() << "&inst: " << &inst << "\n";
+                    // errs() << "operand 0: " << inst.getOperand(0) << "\n";
                 }
-                if(inst.getOpcode() == Instruction::Store){
+                if (inst.getOpcode() == Instruction::Store) {
                     Value* srcReg = inst.getOperand(0);
                     Value* destReg = inst.getOperand(1);
                     int srcID = processSrc(srcReg);
                     processDest(destReg, srcID);
 
-                    errs() << "\t\t\t" << srcID << " = " << srcID << "\n";
-                    errs() << "This is Store"<<"\n";
-                    errs() << "operand 0: " << inst.getOperand(0) << "\n";
-                    errs() << "operand 1: " << inst.getOperand(1) << "\n";
-                    if (inst.isBinaryOp()) {
-                        errs() << "BINARY!! \n";
-                    } else {
-                        errs() << "NOT binary..\n";
-                    }
+                    errs() << inst << "\t" << srcID << " = " << srcID << "\n";
+                    // errs() << "This is Store"<<"\n";
+                    // errs() << "operand 0: " << inst.getOperand(0) << "\n";
+                    // errs() << "operand 1: " << inst.getOperand(1) << "\n";
 
                 }
                 if (inst.isBinaryOp())
                 {
-                    errs() << "Op Code:" << inst.getOpcodeName()<<"\n";
-                    if(inst.getOpcode() == Instruction::Add){
+                    // errs() << "Op Code:" << inst.getOpcodeName()<<"\n";
+                    if (inst.getOpcode() == Instruction::Add) {
                         Value* srcRegA = inst.getOperand(0);
                         Value* srcRegB = inst.getOperand(1);
                         Value* destReg = &inst;
@@ -117,18 +107,13 @@ struct ValueNumbering : public FunctionPass {
                         int binID = processBinOp(srcIDA, srcIDB, '+');
                         processDest(destReg, binID);
 
-                        errs() << "\t\t\t" << binID << " = " << srcIDA << " add " << srcIDB << "\n";
-                        errs() << "This is Addition"<<"\n";
-                        errs() << "&inst: " << &inst << "\n";
-                        errs() << "operand 0: " << inst.getOperand(0) << "\n";
-                        errs() << "operand 1: " << inst.getOperand(1) << "\n";
-                        if (inst.isBinaryOp()) {
-                            errs() << "BINARY!! \n";
-                        } else {
-                            errs() << "NOT binary..\n";
-                        }
+                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " add " << srcIDB << "\n";
+                        // errs() << "This is Addition"<<"\n";
+                        // errs() << "&inst: " << &inst << "\n";
+                        // errs() << "operand 0: " << inst.getOperand(0) << "\n";
+                        // errs() << "operand 1: " << inst.getOperand(1) << "\n";
                     }
-                    if(inst.getOpcode() == Instruction::Mul){
+                    if (inst.getOpcode() == Instruction::Mul) {
                         Value* srcRegA = inst.getOperand(0);
                         Value* srcRegB = inst.getOperand(1);
                         Value* destReg = &inst;
@@ -137,16 +122,11 @@ struct ValueNumbering : public FunctionPass {
                         int binID = processBinOp(srcIDA, srcIDB, '*');
                         processDest(destReg, binID);
                         
-                        errs() << "\t\t\t" << binID << " = " << srcIDA << " mult " << srcIDB << "\n";
-                        errs() << "This is Multiplication"<<"\n";
-                        errs() << "&inst: " << &inst << "\n";
-                        errs() << "operand 0: " << inst.getOperand(0) << "\n";
-                        errs() << "operand 1: " << inst.getOperand(1) << "\n";
-                        if (inst.isBinaryOp()) {
-                            errs() << "BINARY!! \n";
-                        } else {
-                            errs() << "NOT binary..\n";
-                        }
+                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " mult " << srcIDB << "\n";
+                        // errs() << "This is Multiplication"<<"\n";
+                        // errs() << "&inst: " << &inst << "\n";
+                        // errs() << "operand 0: " << inst.getOperand(0) << "\n";
+                        // errs() << "operand 1: " << inst.getOperand(1) << "\n";
                     }
                     
                     // see other classes, Instruction::Sub, Instruction::UDiv, Instruction::SDiv
