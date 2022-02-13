@@ -27,7 +27,7 @@ struct ValueNumbering : public FunctionPass {
 
     int processSrc(Value* reg) {
         auto itr = registers.find(reg);
-       if (itr == registers.end()) {
+        if (itr == registers.end()) {
             valCounter++;
             registers.insert({reg, valCounter});
             return valCounter;
