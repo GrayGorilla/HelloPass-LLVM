@@ -45,7 +45,7 @@ struct ValueNumbering : public FunctionPass {
         }
     }
 
-    int processBinOp(int a, int b, char sign) {
+    int processBinOp(int a, int b, char sign, bool& exists) {
         string keyA = to_string(a) + sign + to_string(b);
         string keyB = to_string(b) + sign + to_string(a);
         auto itr = binaryExpr.find(keyA);
@@ -55,9 +55,11 @@ struct ValueNumbering : public FunctionPass {
             if (itr == binaryExpr.end()) {
                 valCounter++;
                 binaryExpr.insert({keyA, valCounter});
+                exists = false;
                 return valCounter;
             }
-        } 
+        }
+        exists = true;
         return itr->second;
     }
 
@@ -97,6 +99,7 @@ struct ValueNumbering : public FunctionPass {
                 }
                 if (inst.isBinaryOp())
                 {
+                    bool exists;
                     // errs() << "Op Code:" << inst.getOpcodeName()<<"\n";
                     if (inst.getOpcode() == Instruction::Add) {
                         Value* srcRegA = inst.getOperand(0);
@@ -104,10 +107,12 @@ struct ValueNumbering : public FunctionPass {
                         Value* destReg = &inst;
                         int srcIDA = processSrc(srcRegA);
                         int srcIDB = processSrc(srcRegB);
-                        int binID = processBinOp(srcIDA, srcIDB, '+');
+                        int binID = processBinOp(srcIDA, srcIDB, '+', exists);
                         processDest(destReg, binID);
 
-                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " add " << srcIDB << "\n";
+                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " add " << srcIDB;
+                        if (exists) errs() << " (redundant)"; 
+                        errs() << "\n";
                         // errs() << "This is Addition"<<"\n";
                         // errs() << "&inst: " << &inst << "\n";
                         // errs() << "operand 0: " << inst.getOperand(0) << "\n";
@@ -119,10 +124,12 @@ struct ValueNumbering : public FunctionPass {
                         Value* destReg = &inst;
                         int srcIDA = processSrc(srcRegA);
                         int srcIDB = processSrc(srcRegB);
-                        int binID = processBinOp(srcIDA, srcIDB, '*');
+                        int binID = processBinOp(srcIDA, srcIDB, '*', exists);
                         processDest(destReg, binID);
                         
-                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " mult " << srcIDB << "\n";
+                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " mult " << srcIDB;
+                        if (exists) errs() << " (redundant)"; 
+                        errs() << "\n";
                         // errs() << "This is Multiplication"<<"\n";
                         // errs() << "&inst: " << &inst << "\n";
                         // errs() << "operand 0: " << inst.getOperand(0) << "\n";
@@ -134,10 +141,12 @@ struct ValueNumbering : public FunctionPass {
                         Value* destReg = &inst;
                         int srcIDA = processSrc(srcRegA);
                         int srcIDB = processSrc(srcRegB);
-                        int binID = processBinOp(srcIDA, srcIDB, '-');
+                        int binID = processBinOp(srcIDA, srcIDB, '-', exists);
                         processDest(destReg, binID);
                         
-                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " sub " << srcIDB << "\n";
+                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " sub " << srcIDB;
+                        if (exists) errs() << " (redundant)"; 
+                        errs() << "\n";
                         // errs() << "This is Subtraction"<<"\n";
                         // errs() << "&inst: " << &inst << "\n";
                         // errs() << "operand 0: " << inst.getOperand(0) << "\n";
@@ -149,10 +158,12 @@ struct ValueNumbering : public FunctionPass {
                         Value* destReg = &inst;
                         int srcIDA = processSrc(srcRegA);
                         int srcIDB = processSrc(srcRegB);
-                        int binID = processBinOp(srcIDA, srcIDB, '/');
+                        int binID = processBinOp(srcIDA, srcIDB, '/', exists);
                         processDest(destReg, binID);
                         
-                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " udiv " << srcIDB << "\n";
+                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " udiv " << srcIDB;
+                        if (exists) errs() << " (redundant)"; 
+                        errs() << "\n";
                         // errs() << "This is uDivision"<<"\n";
                         // errs() << "&inst: " << &inst << "\n";
                         // errs() << "operand 0: " << inst.getOperand(0) << "\n";
@@ -164,10 +175,12 @@ struct ValueNumbering : public FunctionPass {
                         Value* destReg = &inst;
                         int srcIDA = processSrc(srcRegA);
                         int srcIDB = processSrc(srcRegB);
-                        int binID = processBinOp(srcIDA, srcIDB, '/');
+                        int binID = processBinOp(srcIDA, srcIDB, '/', exists);
                         processDest(destReg, binID);
                         
-                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " sdiv " << srcIDB << "\n";
+                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " sdiv " << srcIDB;
+                        if (exists) errs() << " (redundant)"; 
+                        errs() << "\n";
                         // errs() << "This is sDivision"<<"\n";
                         // errs() << "&inst: " << &inst << "\n";
                         // errs() << "operand 0: " << inst.getOperand(0) << "\n";
