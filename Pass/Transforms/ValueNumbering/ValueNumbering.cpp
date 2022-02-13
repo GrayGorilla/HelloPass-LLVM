@@ -128,6 +128,51 @@ struct ValueNumbering : public FunctionPass {
                         // errs() << "operand 0: " << inst.getOperand(0) << "\n";
                         // errs() << "operand 1: " << inst.getOperand(1) << "\n";
                     }
+                    if (inst.getOpcode() == Instruction::Sub) {
+                        Value* srcRegA = inst.getOperand(0);
+                        Value* srcRegB = inst.getOperand(1);
+                        Value* destReg = &inst;
+                        int srcIDA = processSrc(srcRegA);
+                        int srcIDB = processSrc(srcRegB);
+                        int binID = processBinOp(srcIDA, srcIDB, '-');
+                        processDest(destReg, binID);
+                        
+                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " sub " << srcIDB << "\n";
+                        // errs() << "This is Subtraction"<<"\n";
+                        // errs() << "&inst: " << &inst << "\n";
+                        // errs() << "operand 0: " << inst.getOperand(0) << "\n";
+                        // errs() << "operand 1: " << inst.getOperand(1) << "\n";
+                    }
+                    if (inst.getOpcode() == Instruction::UDiv) {
+                        Value* srcRegA = inst.getOperand(0);
+                        Value* srcRegB = inst.getOperand(1);
+                        Value* destReg = &inst;
+                        int srcIDA = processSrc(srcRegA);
+                        int srcIDB = processSrc(srcRegB);
+                        int binID = processBinOp(srcIDA, srcIDB, '/');
+                        processDest(destReg, binID);
+                        
+                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " udiv " << srcIDB << "\n";
+                        // errs() << "This is uDivision"<<"\n";
+                        // errs() << "&inst: " << &inst << "\n";
+                        // errs() << "operand 0: " << inst.getOperand(0) << "\n";
+                        // errs() << "operand 1: " << inst.getOperand(1) << "\n";
+                    }
+                    if (inst.getOpcode() == Instruction::SDiv) {
+                        Value* srcRegA = inst.getOperand(0);
+                        Value* srcRegB = inst.getOperand(1);
+                        Value* destReg = &inst;
+                        int srcIDA = processSrc(srcRegA);
+                        int srcIDB = processSrc(srcRegB);
+                        int binID = processBinOp(srcIDA, srcIDB, '/');
+                        processDest(destReg, binID);
+                        
+                        errs() << inst << "\t\t" << binID << " = " << srcIDA << " sdiv " << srcIDB << "\n";
+                        // errs() << "This is sDivision"<<"\n";
+                        // errs() << "&inst: " << &inst << "\n";
+                        // errs() << "operand 0: " << inst.getOperand(0) << "\n";
+                        // errs() << "operand 1: " << inst.getOperand(1) << "\n";
+                    }
                     
                     // see other classes, Instruction::Sub, Instruction::UDiv, Instruction::SDiv
                     // errs() << "Operand(0)" << (*inst.getOperand(0))<<"\n";
