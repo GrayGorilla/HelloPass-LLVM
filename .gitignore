@@ -4,5 +4,5 @@ Pass/build/CMakeFiles/
 Pass/build/Makefile
 Pass/build/cmake_install.cmake
 Pass/build/libLLVMValueNumberingPass.so
-test/test.ll
+test/*.ll
 output.txt
