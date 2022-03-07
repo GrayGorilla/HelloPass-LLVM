@@ -6,3 +6,4 @@ Pass/build/cmake_install.cmake
 Pass/build/libLLVMValueNumberingPass.so
 test/*.ll
 output.txt
+.vscode/
