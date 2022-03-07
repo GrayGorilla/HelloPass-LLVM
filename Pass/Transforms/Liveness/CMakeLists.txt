@@ -7,8 +7,8 @@ find_package(LLVM REQUIRED CONFIG)
 add_definitions(${LLVM_DEFINITIONS})
 include_directories(${LLVM_INCLUDE_DIRS})
 
-add_library(LLVMLivenessAnalysisPass MODULE Liveness.cpp)
-set_target_properties(LLVMLivenessAnalysisPass PROPERTIES COMPILE_FLAGS "-D__GLIBCXX_USE_CXX11_ABI=0 ")
+add_library(LLVMLivenessPass MODULE Liveness.cpp)
+set_target_properties(LLVMLivenessPass PROPERTIES COMPILE_FLAGS "-D__GLIBCXX_USE_CXX11_ABI=0 ")
 # SET(CMAKE_MODULE_LINKER_FLAGS "-undefined dynamic_lookup")
 
-target_link_libraries(LLVMLivenessAnalysisPass)
+target_link_libraries(LLVMLivenessPass)
