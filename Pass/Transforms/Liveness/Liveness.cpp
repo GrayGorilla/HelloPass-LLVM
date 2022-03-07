@@ -8,6 +8,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include "llvm/IR/CFG.h"
 
 
 using namespace llvm;
@@ -24,9 +25,9 @@ struct Liveness : public FunctionPass {
     Liveness() : FunctionPass(ID) {}
 
     map<Value*, string> valueNames;
-    map<basic_block, set<string>> UEVar;
-    map<basic_block, set<string>> VarKill;
-    map<basic_block, set<string>> LiveOut;
+    map<BasicBlock*, set<string>> UEVar;
+    map<BasicBlock*, set<string>> VarKill;
+    map<BasicBlock*, set<string>> LiveOut;
 
 
     int num = 0;
@@ -40,29 +41,29 @@ struct Liveness : public FunctionPass {
             {
                 if(inst.getOpcode() == Instruction::Store){
                     // put expression variables into UEVar
-                    if (valueName.find(inst.getOperand(0)) != valueName.end()) {
+                    if (valueNames.find(inst.getOperand(0)) != valueNames.end()) {
                         UEVar[&basic_block].insert(valueNames[inst.getOperand(0)]);
                     }
                     // put the updated variable into VarKill
-                    VarKill[&basic_block].insert(inst.getOperand(1)->getName().str);
+                    VarKill[&basic_block].insert(inst.getOperand(1)->getName());
                 }
                 if(inst.getOpcode() == Instruction::Load){
-                   ValueNames[&inst] = inst.getOperand(0) -> getName().str;
+                   valueNames[&inst] = inst.getOperand(0) -> getName();
                 }
 
-                if (inst.isBinaryOp() || inst.getOpcode == 52)
+                if (inst.isBinaryOp() || inst.getOpcode() == 52)
                 {
                     // checks operand 1, 2, if it doesnt find in VarKill, 
                     // then we insert the variables to UEVar
-                    int operand1 = valueNames[inst.getOperand(0)];
-                    int operand2 = inst.getOperand(1);
+                    // string operand1 = valueNames[inst.getOperand(0)];
+                    // Value* operand2 = inst.getOperand(1);
 
-                    if VarKill[&basic_block].find(operand1) == VarKill[&basic_block].end()){
-                        UEVar[&basic_block].insert(operand1);
+                    if (VarKill[&basic_block].find(valueNames[inst.getOperand(0)]) == VarKill[&basic_block].end()){
+                        UEVar[&basic_block].insert(valueNames[inst.getOperand(0)]);
                     }
 
-                    if VarKill[&basic_block].find(operand2) == VarKill[&basic_block].end()){
-                        UEVar[&basic_block].insert(operand2);
+                    if (VarKill[&basic_block].find(valueNames[inst.getOperand(1)]) == VarKill[&basic_block].end()){
+                        UEVar[&basic_block].insert(valueNames[inst.getOperand(1)]);
                     }
                 } 
             } // end for inst
@@ -76,22 +77,22 @@ struct Liveness : public FunctionPass {
         while(cont) {
             cont = false;
             for (auto& basic_block : F) {
-                dest3 = LiveOut[&basic_block]
-                for (BasicBlock *Succ : successors(*basic_block)) {
+                dest3 = LiveOut[&basic_block];
+                for (BasicBlock *Succ : successors(&basic_block)) {
                     dest1.clear();
                     dest2.clear();
                     set_difference(LiveOut[Succ].begin(), LiveOut[Succ].end(), 
-                                    VarKill[Succ].begin(), VarKill[Succ].end()),
-                                    back_inserter(dest1, dest1.begin());
+                                    VarKill[Succ].begin(), VarKill[Succ].end(),
+                                    inserter(dest1, dest1.begin()));
                     set_union(dest1.begin(), dest1.end(), 
-                                    UEVar[Succ].begin(), UEVar[Succ].end()),
-                                    back_inserter(dest2, dest2.begin());
+                                    UEVar[Succ].begin(), UEVar[Succ].end(),
+                                    inserter(dest2, dest2.begin()));
                     set_union(dest2.begin(), dest2.end(), 
-                                    dest3.begin(), dest3.end()),
-                                    back_inserter(dest3, dest3.begin());
+                                    dest3.begin(), dest3.end(),
+                                    inserter(dest3, dest3.begin()));
                 }
 
-                if (! (LiveOut[&back_block] == dest3)) {
+                if (! (LiveOut[&basic_block] == dest3)) {
                     cont = true;
                 }
                 LiveOut[&basic_block] = dest3;
@@ -99,22 +100,22 @@ struct Liveness : public FunctionPass {
         }
 
         for (auto& basic_block :  F) {
-            errs () << "-----" << basic_block.getName() << "------" << endl;
+            errs () << "-----" << basic_block.getName() << "------\n";
             errs () << "UEVar: ";
             for (auto it : UEVar[&basic_block]) {
                 errs() << it << " ";
             }
-            errs () << endl;
+            errs () << "\n";
             errs () << "VarKill: ";
             for (auto it : VarKill[&basic_block]) {
                 errs () << it << "";
             }
-            errs () << endl;
+            errs () << "\n";
             errs () << "LiveOut: ";
-            for (auto it : LiveOut[&back_block]) {
+            for (auto it : LiveOut[&basic_block]) {
                 errs () << it << " ";
             }
-            errs () << endl;
+            errs () << "\n";
         }
 
         return false;
