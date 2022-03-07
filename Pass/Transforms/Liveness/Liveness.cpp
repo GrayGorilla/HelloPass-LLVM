@@ -45,10 +45,10 @@ struct Liveness : public FunctionPass {
                         UEVar[&basic_block].insert(valueNames[inst.getOperand(0)]);
                     }
                     // put the updated variable into VarKill
-                    VarKill[&basic_block].insert(inst.getOperand(1)->getName());
+                    VarKill[&basic_block].insert(inst.getOperand(1)->getName().str());
                 }
                 if(inst.getOpcode() == Instruction::Load){
-                   valueNames[&inst] = inst.getOperand(0) -> getName();
+                   valueNames[&inst] = inst.getOperand(0)->getName().str();
                 }
 
                 if (inst.isBinaryOp() || inst.getOpcode() == 52)
