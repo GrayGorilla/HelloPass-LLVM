@@ -64,66 +64,65 @@ struct Liveness : public FunctionPass {
                     if VarKill[&basic_block].find(operand2) == VarKill[&basic_block].end()){
                         UEVar[&basic_block].insert(operand2);
                     }
-                } // end if
+                } 
             } // end for inst
         } // end for block
+
+        bool cont = true;
+        set<string> dest1;
+        set<string> dest2;
+        set<string> dest3;
+
+        while(cont) {
+            cont = false;
+            for (auto& basic_block : F) {
+                dest3 = LiveOut[&basic_block]
+                for (BasicBlock *Succ : successors(*basic_block)) {
+                    dest1.clear();
+                    dest2.clear();
+                    set_difference(LiveOut[Succ].begin(), LiveOut[Succ].end(), 
+                                    VarKill[Succ].begin(), VarKill[Succ].end()),
+                                    back_inserter(dest1, dest1.begin());
+                    set_union(dest1.begin(), dest1.end(), 
+                                    UEVar[Succ].begin(), UEVar[Succ].end()),
+                                    back_inserter(dest2, dest2.begin());
+                    set_union(dest2.begin(), dest2.end(), 
+                                    dest3.begin(), dest3.end()),
+                                    back_inserter(dest3, dest3.begin());
+                }
+
+                if (! (LiveOut[&back_block] == dest3)) {
+                    cont = true;
+                }
+                LiveOut[&basic_block] = dest3;
+            }
+        }
+
+        for (auto& basic_block :  F) {
+            errs () << "-----" << basic_block.getName() << "------" << endl;
+            errs () << "UEVar: ";
+            for (auto it : UEVar[&basic_block]) {
+                errs() << it << " ";
+            }
+            errs () << endl;
+            errs () << "VarKill: ";
+            for (auto it : VarKill[&basic_block]) {
+                errs () << it << "";
+            }
+            errs () << endl;
+            errs () << "LiveOut: ";
+            for (auto it : LiveOut[&back_block]) {
+                errs () << it << " ";
+            }
+            errs () << endl;
+        }
+
         return false;
     } // end runOnFunction
-
-    bool cont = true;
-    set<string> dest1;
-    set<string> dest2;
-    set<string> dest3;
-
-    while(cont) {
-        cont = false;
-        for (auto& basic_block : F) {
-            dest3 = LiveOut[&basic_block]
-            for (BasicBlock *Succ : successors(*basic_block)) {
-                dest1.clear();
-                dest2.clear();
-                set_difference(LiveOut[Succ].begin(), LiveOut[Succ].end(), 
-                                VarKill[Succ].begin(), VarKill[Succ].end()),
-                                back_inserter(dest1, dest1.begin());
-                set_union(dest1.begin(), dest1.end(), 
-                                UEVar[Succ].begin(), UEVar[Succ].end()),
-                                back_inserter(dest2, dest2.begin());
-                set_union(dest2.begin(), dest2.end(), 
-                                dest3.begin(), dest3.end()),
-                                back_inserter(dest3, dest3.begin());
-            }
-
-            if (! (LiveOut[&back_block] == dest3)) {
-                cont = true;
-            }
-            LiveOut[&basic_block] = dest3;
-        }
-    }
-
-
-    for (auto& basic_block :  F) {
-        errs () << "-----" << basic_block.getName() << "------" << endl;
-        errs () << "UEVar: ";
-        for (auto it : UEVar[&basic_block]) {
-            errs() << it << " ";
-        }
-        errs () << endl;
-        errs () << "VarKill: ";
-        for (auto it : VarKill[&basic_block]) {
-            errs () << it << "";
-        }
-        errs () << endl;
-        errs () << "LiveOut: ";
-        for (auto it : LiveOut[&back_block]) {
-            errs () << it << " ";
-        }
-        errs () << endl;
-    }
-
 }; // end of struct 
 }  // end of anonymous namespace
 
-char ValueNumbering::ID = 0;
-static RegisterPass<ValueNumbering> X("ValueNumbering", "ValueNumbering Pass",
+char Liveness::ID = 0;
+static RegisterPass<Liveness> X("Liveness", "Liveness Pass",
                              false /* Only looks at CFG */,
                              false /* Analysis Pass */);
