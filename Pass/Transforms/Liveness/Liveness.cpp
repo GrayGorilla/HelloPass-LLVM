@@ -9,14 +9,12 @@
 #include <map>
 #include <set>
 #include "llvm/IR/CFG.h"
-
+#include "llvm/IR/BasicBlock.h"
 
 using namespace llvm;
 using namespace std;
 
 #define DEBUG_TYPE "Liveness"
-
-using namespace llvm;
 
 namespace {   
 struct Liveness : public FunctionPass {
@@ -24,83 +22,72 @@ struct Liveness : public FunctionPass {
     static char ID;
     Liveness() : FunctionPass(ID) {}
 
-    map<Value*, string> valueNames;
+    map<Value*, string> varNames;
     map<BasicBlock*, set<string>> UEVar;
     map<BasicBlock*, set<string>> VarKill;
     map<BasicBlock*, set<string>> LiveOut;
 
-
-    int num = 0;
-    bool reduntant = 0;
-
     bool runOnFunction(Function &F) override {
-	    
-        for (auto& basic_block : F)
-        {
-            for (auto& inst : basic_block)
-            {
-                if(inst.getOpcode() == Instruction::Store){
+        errs() << "LivenessAnalysisPass: ";	    
+        for (auto& basic_block : F) {
+            for (auto& inst : basic_block) {   
+                if(inst.getOpcode() == Instruction::Store) {
                     // put expression variables into UEVar
-                    if (valueNames.find(inst.getOperand(0)) != valueNames.end()) {
-                        UEVar[&basic_block].insert(valueNames[inst.getOperand(0)]);
+                    if (varNames.find(inst.getOperand(0)) != varNames.end()) {
+                        UEVar[&basic_block].insert(varNames[inst.getOperand(0)]);
                     }
-                    // put the updated variable into VarKill
+                    // put the updated variable into VarKill                    
                     VarKill[&basic_block].insert(inst.getOperand(1)->getName().str());
                 }
-                if(inst.getOpcode() == Instruction::Load){
-                   valueNames[&inst] = inst.getOperand(0)->getName().str();
+
+                if(inst.getOpcode() == Instruction::Load) {
+                    varNames[&inst] = inst.getOperand(0)->getName().str();
                 }
 
-                if (inst.isBinaryOp() || inst.getOpcode() == 52)
-                {
-                    // checks operand 1, 2, if it doesnt find in VarKill, 
-                    // then we insert the variables to UEVar
-                    // string operand1 = valueNames[inst.getOperand(0)];
-                    // Value* operand2 = inst.getOperand(1);
-
-                    if (VarKill[&basic_block].find(valueNames[inst.getOperand(0)]) == VarKill[&basic_block].end()){
-                        UEVar[&basic_block].insert(valueNames[inst.getOperand(0)]);
+                if (inst.isBinaryOp() || inst.getOpcode() == 52 || inst.getOpcode() == 53) {
+                    if (VarKill[&basic_block].find(varNames[inst.getOperand(0)]) == VarKill[&basic_block].end()) {
+                        UEVar[&basic_block].insert(varNames[inst.getOperand(0)]);
                     }
 
-                    if (VarKill[&basic_block].find(valueNames[inst.getOperand(1)]) == VarKill[&basic_block].end()){
-                        UEVar[&basic_block].insert(valueNames[inst.getOperand(1)]);
+                    if (VarKill[&basic_block].find(varNames[inst.getOperand(1)]) == VarKill[&basic_block].end()) {
+                        UEVar[&basic_block].insert(varNames[inst.getOperand(1)]);
                     }
                 } 
             } // end for inst
-        } // end for block
+        }
 
         bool cont = true;
-        set<string> dest1;
-        set<string> dest2;
-        set<string> dest3;
+        set<string> set1;
+        set<string> set2;
+        set<string> set3;
 
         while(cont) {
             cont = false;
             for (auto& basic_block : F) {
-                dest3 = LiveOut[&basic_block];
+                set3 = LiveOut[&basic_block];
                 for (BasicBlock *Succ : successors(&basic_block)) {
-                    dest1.clear();
-                    dest2.clear();
+                    set1.clear();
+                    set2.clear();
                     set_difference(LiveOut[Succ].begin(), LiveOut[Succ].end(), 
                                     VarKill[Succ].begin(), VarKill[Succ].end(),
-                                    inserter(dest1, dest1.begin()));
-                    set_union(dest1.begin(), dest1.end(), 
-                                    UEVar[Succ].begin(), UEVar[Succ].end(),
-                                    inserter(dest2, dest2.begin()));
-                    set_union(dest2.begin(), dest2.end(), 
-                                    dest3.begin(), dest3.end(),
-                                    inserter(dest3, dest3.begin()));
+                                    inserter(set1, set1.begin()));
+                    set_union(set1.begin(), set1.end(), 
+                            UEVar[Succ].begin(), UEVar[Succ].end(),
+                            inserter(set2, set2.begin()));
+                    set_union(set2.begin(), set2.end(), 
+                            set3.begin(), set3.end(),
+                            inserter(set3, set3.begin()));
                 }
 
-                if (! (LiveOut[&basic_block] == dest3)) {
+                if (! (LiveOut[&basic_block] == set3)) {
                     cont = true;
                 }
-                LiveOut[&basic_block] = dest3;
+                LiveOut[&basic_block] = set3;
             }
         }
 
         for (auto& basic_block :  F) {
-            errs () << "-----" << basic_block.getName() << "------\n";
+            // errs () << "-----" << basic_block.getName() << "------\n";
             errs () << "UEVar: ";
             for (auto it : UEVar[&basic_block]) {
                 errs() << it << " ";
@@ -108,7 +95,7 @@ struct Liveness : public FunctionPass {
             errs () << "\n";
             errs () << "VarKill: ";
             for (auto it : VarKill[&basic_block]) {
-                errs () << it << "";
+                errs () << it << " ";
             }
             errs () << "\n";
             errs () << "LiveOut: ";
@@ -117,7 +104,6 @@ struct Liveness : public FunctionPass {
             }
             errs () << "\n";
         }
-
         return false;
     } // end runOnFunction
 }; // end of struct 
